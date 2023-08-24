@@ -11,6 +11,9 @@ import os
 from matplotlib import pyplot as plt
 import time
 from IPython import display
+from google.colab import drive
+
+drive.mount('/content/drive')
 
 FOLDER_PATH = '/content/drive/MyDrive/Image_colorizer/'
 # Create a dataset from the generator
@@ -206,16 +209,16 @@ def build_generator():
 
     # Adjusted filter sizes for consistency
     down_stack = [
-        downsample(128, 4, apply_batchnorm = True),
-        downsample(256, 4, apply_batchnorm = True),
         downsample(256, 4, apply_batchnorm = True),
         downsample(512, 4, apply_batchnorm = True),
+        downsample(512, 4, apply_batchnorm = True),
+        downsample(1024, 4, apply_batchnorm = True),
     ]
 
     up_stack = [
-        upsample_res(256, 4),
-        upsample_res(128, 4, apply_dropout=True),
-        upsample_res(64, 4, apply_dropout=True),
+        upsample_res(512, 4),
+        upsample_res(512, 4, apply_dropout=True),
+        upsample_res(256, 4, apply_dropout=True),
     ]
 
     # Used a 3x3 kernel for the final convolution
@@ -276,7 +279,7 @@ def build_discriminator():
     down3 = downsample(256, 4, apply_layernorm= True)(down2)
 
     x = layers.Conv2D(256, (4, 4,), strides=(1, 1), padding='same', kernel_initializer=initializer)(down3)
-    x = MiniBatchDiscrimination(B, C)(x)  # Add MiniBatchDiscrimination layer here
+    #x = MiniBatchDiscrimination(B, C)(x)  # Add MiniBatchDiscrimination layer here
 
     zero_pad1 = layers.ZeroPadding2D()(x)
     conv = layers.Conv2D(512, 4, strides=1, kernel_initializer=initializer, use_bias=False)(zero_pad1)
@@ -398,7 +401,7 @@ def fit(train_ds, test_ds, epochs):
                 print(f'Epoch {epoch}: {step} / {train_end}')
 
             if step == train_end - 1:
-                checkpoint.save(FOLDER_PATH + 'weights' + 'lambda100_bs16' + '.ckpt')
+                checkpoint.save(FOLDER_PATH + 'weights' + 'lambda100_bs16_strongergen' + '.ckpt')
 
 
 def pretrain_step(input_image, target):
@@ -575,7 +578,7 @@ summary_writer = tf.summary.create_file_writer(
 
 
 
-weights_path = FOLDER_PATH + "weightslambda100_bs16.ckpt-10"
+weights_path = FOLDER_PATH + "weightslambda100_bs16.ckpt-5"
 print(weights_path)
 
 checkpoint.restore(weights_path)
