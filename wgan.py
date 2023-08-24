@@ -11,9 +11,6 @@ import os
 from matplotlib import pyplot as plt
 import time
 from IPython import display
-from google.colab import drive
-
-drive.mount('/content/drive')
 
 FOLDER_PATH = '/content/drive/MyDrive/Image_colorizer/'
 # Create a dataset from the generator
